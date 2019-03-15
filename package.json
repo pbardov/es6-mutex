@@ -1,0 +1,37 @@
+{
+  "name": "es6-mutex",
+  "version": "1.0.0",
+  "description": "Mutex based on ES6 Promises",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pbardov/es6-mutex.git"
+  },
+  "keywords": [
+    "es6",
+    "promise",
+    "mutex",
+    "async",
+    "await"
+  ],
+  "author": "Pavel Bardov <pbardov at gmail dot com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pbardov/es6-mutex/issues"
+  },
+  "homepage": "https://github.com/pbardov/es6-mutex#readme",
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^5.15.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4",
+    "mocha": "^6.0.2"
+  }
+}
