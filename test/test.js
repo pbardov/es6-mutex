@@ -13,7 +13,7 @@ chai.use(chaiAsPromised);
 
 const { Mutex } = require('../index');
 
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('Semaphore and Mutex test', function semTest() {
   this.timeout(20000);
