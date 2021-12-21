@@ -1,6 +1,6 @@
 {
   "name": "es6-mutex",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Mutex based on ES6 Promises",
   "main": "index.js",
   "scripts": {
