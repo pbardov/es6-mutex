@@ -3,9 +3,11 @@ const { EventEmitter } = require('events');
 
 class Semaphore extends EventEmitter {
   static immediate() {
+    let immediateID;
     const promise = new Promise((resolve) => {
-      promise.immediateID = setImmediate(resolve);
+      immediateID = setImmediate(resolve);
     });
+    promise.immediateID = immediateID;
     return promise;
   }
 
