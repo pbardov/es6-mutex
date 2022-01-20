@@ -49,8 +49,11 @@ describe('Semaphore and Mutex test', function semTest() {
     });
 
     const res = await Promise.all(w);
+    for (let n = 0; n < res.length; ++n) {
+      assert(vals.includes(res[n]), `${n} ${res[n]} not in vals`);
+    }
     for (let n = 0; n < vals.length; ++n) {
-      assert(res[n] === vals[n], `${n} ${res[n]} != ${vals[n]}`);
+      assert(res.includes(vals[n]), `${n} ${vals[n]} not in res`);
     }
   });
 
@@ -65,8 +68,11 @@ describe('Semaphore and Mutex test', function semTest() {
     });
 
     const res = await Promise.all(w);
+    for (let n = 0; n < res.length; ++n) {
+      assert(vals.includes(res[n]), `${n} ${res[n]} not in vals`);
+    }
     for (let n = 0; n < vals.length; ++n) {
-      assert(res[n] === vals[n], `${n} ${res[n]} != ${vals[n]}`);
+      assert(res.includes(vals[n]), `${n} ${vals[n]} not in res`);
     }
   });
 });
