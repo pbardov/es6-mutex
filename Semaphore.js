@@ -21,6 +21,45 @@ class Semaphore extends EventEmitter {
     return { promise, resolve, reject };
   }
 
+  static async runTimedout(timeout, fn, ...args) {
+    return new Promise((resolve, reject) => {
+      let completed = false;
+      const mResolve = (...margs) => {
+        if (!completed) {
+          completed = true;
+          resolve(...margs);
+        }
+      };
+      const mReject = (error) => {
+        if (!completed) {
+          completed = true;
+          reject(error);
+        }
+      };
+
+      const tid = setTimeout(() => {
+        mReject(new Error('Timedout'));
+      }, timeout);
+      let itsPromise = false;
+      try {
+        const promise = fn(...args);
+        if (typeof promise?.then === 'function' && typeof promise?.catch === 'function') {
+          itsPromise = true;
+          promise
+            .then((...margs) => mResolve(...margs))
+            .catch((error) => mReject(error))
+            .finally(() => clearTimeout(tid));
+        } else {
+          mResolve(promise);
+        }
+      } catch (error) {
+        mReject(error);
+      } finally {
+        if (!itsPromise) clearTimeout(tid);
+      }
+    });
+  }
+
   #n = 0;
 
   #waits = [];
@@ -53,7 +92,7 @@ class Semaphore extends EventEmitter {
       this.#waitsComplete.push(wait);
       return wait.promise;
     }
-    return Promise.resolve();
+    return undefined;
   }
 
   async done() {
@@ -67,7 +106,7 @@ class Semaphore extends EventEmitter {
       this.#waits.push(wait);
       return wait.promise;
     }
-    return Promise.resolve();
+    return undefined;
   }
 
   async onRelease() {
@@ -88,6 +127,14 @@ class Semaphore extends EventEmitter {
     } while (!this.isFree);
     this.#n += 1;
     this.emit('acquire', this.#n);
+  }
+
+  tryAcquire() {
+    if (this.isFree) {
+      this.#n += 1;
+      return true;
+    }
+    return false;
   }
 
   release() {
@@ -112,6 +159,23 @@ class Semaphore extends EventEmitter {
     } finally {
       this.release();
     }
+  }
+
+  async useAcquired(fn, ...args) {
+    try {
+      const result = await fn(...args);
+      return result;
+    } finally {
+      this.release();
+    }
+  }
+
+  async parallel(timeout, what, ...args) {
+    const self = this.constructor;
+    const cb = typeof what === 'function' ? what : async () => what;
+    await this.acquire();
+    const promise = this.useAcquired(async () => self.runTimedout(timeout, cb, ...args));
+    return { promise };
   }
 }
 

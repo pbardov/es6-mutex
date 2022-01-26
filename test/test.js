@@ -1,5 +1,5 @@
 /* global describe, it */
-/* eslint-disable no-await-in-loop */
+/* eslint-disable no-await-in-loop, no-loop-func */
 const process = require('process');
 
 process.env.DEBUG = true;
@@ -11,7 +11,7 @@ const crypto = require('crypto');
 
 chai.use(chaiAsPromised);
 
-const { Mutex } = require('../index');
+const { Mutex, Semaphore } = require('../index');
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -74,5 +74,30 @@ describe('Semaphore and Mutex test', function semTest() {
     for (let n = 0; n < vals.length; ++n) {
       assert(res.includes(vals[n]), `${n} ${vals[n]} not in res`);
     }
+  });
+
+  it('Prallel test', async () => {
+    let count = 0;
+    const sem = new Semaphore(20);
+    for (let n = 0; n < 1000; n += 1) {
+      const { promise } = await sem.parallel(
+        n % 2 > 0 ? 10 : 1000,
+        async (v) => {
+          const ms = 100 + Math.ceil(Math.random() * 100);
+          await delay(ms);
+          return v;
+        },
+        n
+      );
+      promise
+        .then((v) => {
+          count += v;
+        })
+        .catch(() => {});
+    }
+    await sem.done();
+
+    const valid = (500 * 998) / 2;
+    assert(count === valid, `bad count = ${count} != ${valid}`);
   });
 });
