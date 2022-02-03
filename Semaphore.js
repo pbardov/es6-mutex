@@ -37,9 +37,9 @@ class Semaphore extends EventEmitter {
         }
       };
 
-      const tid = setTimeout(() => {
+      const tid = timeout ? setTimeout(() => {
         mReject(new Error('Timedout'));
-      }, timeout);
+      }, timeout) : undefined;
       let itsPromise = false;
       try {
         const promise = fn(...args);
@@ -48,7 +48,7 @@ class Semaphore extends EventEmitter {
           promise
             .then((...margs) => mResolve(...margs))
             .catch((error) => mReject(error))
-            .finally(() => clearTimeout(tid));
+            .finally(() => (tid ? clearTimeout(tid) : false));
         } else {
           mResolve(promise);
         }
