@@ -132,6 +132,7 @@ class Semaphore extends EventEmitter {
   tryAcquire() {
     if (this.isFree) {
       this.#n += 1;
+      this.emit('acquire', this.#n);
       return true;
     }
     return false;
