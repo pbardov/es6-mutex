@@ -1,6 +1,8 @@
 /* eslint-disable no-await-in-loop */
 const { EventEmitter } = require('events');
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 class Semaphore extends EventEmitter {
   static immediate() {
     let immediateID;
@@ -22,42 +24,13 @@ class Semaphore extends EventEmitter {
   }
 
   static async runTimedout(timeout, fn, ...args) {
-    return new Promise((resolve, reject) => {
-      let completed = false;
-      const mResolve = (...margs) => {
-        if (!completed) {
-          completed = true;
-          resolve(...margs);
-        }
-      };
-      const mReject = (error) => {
-        if (!completed) {
-          completed = true;
-          reject(error);
-        }
-      };
-
-      const tid = timeout ? setTimeout(() => {
-        mReject(new Error('Timedout'));
-      }, timeout) : undefined;
-      let itsPromise = false;
-      try {
-        const promise = fn(...args);
-        if (typeof promise?.then === 'function' && typeof promise?.catch === 'function') {
-          itsPromise = true;
-          promise
-            .then((...margs) => mResolve(...margs))
-            .catch((error) => mReject(error))
-            .finally(() => (tid ? clearTimeout(tid) : false));
-        } else {
-          mResolve(promise);
-        }
-      } catch (error) {
-        mReject(error);
-      } finally {
-        if (!itsPromise) clearTimeout(tid);
-      }
-    });
+    return Promise.race([
+      (async () => fn(...args))(),
+      (async () => {
+        await delay(timeout);
+        throw new Error('Timedout');
+      })()
+    ]);
   }
 
   #n = 0;
