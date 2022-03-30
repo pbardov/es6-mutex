@@ -25,7 +25,10 @@ class Semaphore extends EventEmitter {
 
   static async runTimedout(timeout, fn, ...args) {
     return Promise.race([
-      (async () => fn(...args))(),
+      (async () => {
+        const result = await fn(...args);
+        return result;
+      })(),
       (async () => {
         await delay(timeout);
         throw new Error('Timedout');
