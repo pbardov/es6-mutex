@@ -30,8 +30,12 @@ class Semaphore extends EventEmitter {
         return result;
       })(),
       (async () => {
+        const error = new Error('Timedout');
+        error.timeout = timeout;
+        error.started = new Date();
         await delay(timeout);
-        throw new Error('Timedout');
+        error.completed = new Date();
+        throw error;
       })()
     ]);
   }
